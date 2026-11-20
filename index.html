@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drop anchor</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#2C3566">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1EEF3; --surface:#FBFAFC; --ink:#232445; --muted:#5F5D78; --line:#D6D0DC;
+  --sky-top:#C9C3DE; --sky:#F2D9CF; --sea-top:#55628F; --sea-deep:#1F2347; --sand:#CDB28F; --sand-dark:#AD936F;
+  --rope:#8A6A40; --brass:#E8913A; --tiger:#E8913A; --stripe:#2B1A12; --signal:#B5403A; --chip-on:#232445; --chip-on-text:#FBFAFC;
+  --on-water:rgba(255,255,255,.62);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#14142A; --surface:#1C1C36; --ink:#ECE8F2; --muted:#A8A3BF; --line:#33335A;
+    --sky-top:#1E1A38; --sky:#4A3352; --sea-top:#2C3566; --sea-deep:#0C0E24; --sand:#6B5A47; --sand-dark:#55473A;
+    --rope:#B08A5A; --brass:#F0A050; --tiger:#F0A050; --stripe:#2B1A12; --signal:#E2735C; --chip-on:#ECE8F2; --chip-on-text:#14142A;
+    --on-water:rgba(255,255,255,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14142A; --surface:#1C1C36; --ink:#ECE8F2; --muted:#A8A3BF; --line:#33335A;
+    --sky-top:#1E1A38; --sky:#4A3352; --sea-top:#2C3566; --sea-deep:#0C0E24; --sand:#6B5A47; --sand-dark:#55473A;
+    --rope:#B08A5A; --brass:#F0A050; --tiger:#F0A050; --stripe:#2B1A12; --signal:#E2735C; --chip-on:#ECE8F2; --chip-on-text:#14142A;
+    --on-water:rgba(255,255,255,.5);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:1.0625rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Alegreya",Georgia,"Times New Roman",serif;font-weight:600;line-height:1.15;margin:0}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px;border-radius:4px}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header.top{padding:28px 0 18px}
+header.top h1{font-size:clamp(2rem,5vw,2.9rem);letter-spacing:-.01em}
+header.top p{margin:.4rem 0 0;color:var(--muted);max-width:60ch}
+
+.layout{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:28px;align-items:start}
+.sea{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);height:min(640px,calc(100vh - 40px));border-radius:14px;overflow:hidden;background:var(--sea-deep)}
+.sea svg{display:block;width:100%;height:100%}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:28px clamp(18px,4vw,36px) 32px;min-height:420px}
+
+.ace{display:flex;align-items:center;gap:6px;margin-bottom:18px;color:var(--muted);font-size:.95rem}
+.ace span.l{font-family:"Alegreya",Georgia,serif;font-weight:700;font-size:1.15rem;width:2rem;height:2rem;display:inline-grid;place-items:center;border-radius:50%;border:1.5px solid var(--line);color:var(--muted)}
+.ace span.l.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.ace span.l.done{border-color:var(--brass);color:var(--ink)}
+.ace .round{margin-left:10px}
+
+.panel h2{font-size:clamp(1.6rem,3.4vw,2.1rem);margin-bottom:.45rem}
+.panel p.lead{margin:0 0 1.3rem;max-width:58ch;color:var(--muted)}
+.field{margin:0 0 1.6rem}
+.field label.q{display:block;font-weight:500;margin-bottom:.5rem}
+.scale{display:flex;align-items:center;gap:14px}
+.scale input[type=range]{flex:1;accent-color:var(--ink);height:28px}
+.scale output{min-width:9.5rem;font-family:"Alegreya",Georgia,serif;font-size:1.15rem}
+.ends{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted);margin-right:calc(9.5rem + 14px)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:.38rem .9rem;cursor:pointer;line-height:1.3}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--chip-on);color:var(--chip-on-text);border-color:var(--chip-on)}
+.chip .n{opacity:.6;font-size:.85em;margin-left:.3rem}
+.addrow{display:flex;gap:8px;max-width:460px}
+.addrow input,.textin{flex:1;min-width:0;padding:.55rem .75rem;border:1.5px solid var(--line);border-radius:6px;background:var(--paper)}
+.textin{width:100%;max-width:520px}
+
+.checks{list-style:none;padding:0;margin:0 0 1.4rem;display:grid;gap:8px}
+.checks label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.checks input{width:1.15rem;height:1.15rem;margin-top:.22rem;accent-color:var(--ink)}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:1.6rem}
+.btn{border:1.5px solid var(--ink);background:var(--ink);color:var(--surface);padding:.65rem 1.25rem;border-radius:6px;cursor:pointer;font-weight:500}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.small{padding:.45rem .9rem;font-size:.95rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hint{color:var(--muted);font-size:.95rem}
+.err{color:var(--signal);font-size:.95rem;margin:.4rem 0 0;min-height:1.4em}
+
+.pacer{display:flex;align-items:center;gap:18px;margin:6px 0 4px;padding:14px;border:1px dashed var(--line);border-radius:8px;max-width:460px}
+.pacer .ring{width:64px;height:64px;flex:none;border-radius:50%;border:2px solid var(--sea-top);display:grid;place-items:center}
+.pacer .dot{width:62px;height:62px;border-radius:50%;background:var(--sea-top);opacity:.35;transform:scale(.45);transition:transform 4s ease-in-out}
+.pacer .say{font-family:"Alegreya",Georgia,serif;font-size:1.15rem}
+
+.result{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:6px 0 10px}
+.reading{border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.reading h3{font-size:1.05rem;font-family:"Alegreya Sans",sans-serif;font-weight:500;color:var(--muted);margin-bottom:.3rem}
+.reading .val{font-family:"Alegreya",Georgia,serif;font-size:1.9rem}
+.reading .val small{font-size:1rem;color:var(--muted)}
+
+section.log{margin:40px 0 0;padding-bottom:10px}
+section.log h2{font-size:1.7rem;margin-bottom:.3rem}
+.storage{color:var(--muted);font-size:.92rem;margin:0 0 1rem}
+.insight{max-width:66ch;margin:0 0 1.2rem}
+.toplist{margin:0 0 1.4rem}
+.entries{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.entry{display:grid;grid-template-columns:150px 1fr auto;gap:18px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+.entry time{font-weight:500}
+.entry .sub{color:var(--muted);font-size:.93rem}
+.sound{display:flex;align-items:center;gap:8px;font-size:.92rem;color:var(--muted);white-space:nowrap}
+.bar{position:relative;width:110px;height:8px;border-radius:4px;background:var(--line)}
+.bar i{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px}
+.bar i.b{background:var(--muted)}
+.bar i.a{background:var(--ink)}
+.empty{color:var(--muted);padding:14px 0}
+.toska{margin:0 0 12px;max-width:56ch;font-family:"Alegreya",Georgia,serif;font-style:italic;color:var(--muted)}
+.toska:empty{display:none}
+.backup{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:1.4rem}
+.backup .hint{flex-basis:100%}
+
+footer.about{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.95rem;max-width:70ch}
+footer.about p{margin:0 0 .7rem}
+
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:16px}
+  .panel{min-width:0}
+  .sea{position:relative;top:0;height:230px}
+  .ends{margin-right:0}
+  .scale{flex-wrap:wrap}
+  .scale output{min-width:0}
+  .entry{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .pacer .dot{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Drop anchor, little tiger</h1>
+    <p>For when a big feeling grabs the wheel. Even the fiercest small tiger gets caught in weather sometimes. Take a few minutes to hold your ground. The storm may not pass, and that’s okay. The point is to stop drifting with it.</p>
+  </header>
+
+  <main class="layout">
+    <aside class="sea" aria-hidden="true"><svg id="scene"></svg></aside>
+    <section class="panel" id="panel" aria-live="polite"></section>
+  </main>
+
+  <section class="log" id="log" aria-labelledby="logTitle">
+    <h2 id="logTitle">Your log</h2>
+    <p class="storage" id="storageNote">Loading your log…</p>
+    <div id="logBody"></div>
+  </section>
+
+  <footer class="about">
+    <p>This uses the ACE steps of “dropping anchor” from acceptance and commitment therapy, as taught by Dr. Russ Harris: acknowledge your thoughts and feelings, come back into your body, engage with what you’re doing. Loop through them slowly three or four times. It isn’t a relaxation trick; the feelings are allowed to stay.</p>
+    <p>Made with love for Kate.</p>
+    <p>It’s built for everyday storms. If your feelings are overwhelming or you don’t feel safe, reach out to someone you trust or a mental health professional. In the US you can call or text 988 at any hour.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- content ---------- */
+const FEELINGS = ["Toska","Anxiety","Dread","Anger","Sadness","Shame","Tight chest","Racing heart","Racing thoughts","Urge to leave","Urge to snap","“I can’t handle this”","Numbness"];
+const MOVES = ["Press my feet into the floor","Push my fingertips together","Straighten my spine","Roll my shoulders back slowly","Press my palms onto the desk","Stretch my arms out slowly"];
+const NOTICES = ["Five things I can see","Three things I can hear","Where I am, and who’s around","What my hands were busy with"];
+const ROUGH_WORDS = ["Flat calm","Ripples","Light chop","Choppy","Choppy","Rough","Rough","Very rough","Heavy seas","Storm","Full storm"];
+const HERE_WORDS  = ["Lost at sea","Barely here","Mostly elsewhere","Drifting","Half here","Half here","Mostly here","Mostly here","Here","Firmly here","Fully here"];
+
+/* ---------- state ---------- */
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let S = freshSession();
+let LOG = [];
+let timers = [];
+
+function freshSession(){
+  return { phase:"before", round:1, stations:0, before:{rough:5,here:5}, after:{rough:5,here:5},
+           named:new Set(), allNamed:new Set(), extraFeelings:[], move:null, moves:[], extraMoves:[],
+           noticed:new Set(), returning:"" };
+}
+function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+const $ = (s,r=document)=>r.querySelector(s);
+function el(tag, attrs, ...kids){
+  const n=document.createElement(tag);
+  if(attrs) for(const k in attrs){
+    if(k==="class") n.className=attrs[k];
+    else if(k==="text") n.textContent=attrs[k];
+    else if(k.startsWith("on")) n.addEventListener(k.slice(2),attrs[k]);
+    else if(attrs[k]!==false && attrs[k]!=null) n.setAttribute(k,attrs[k]===true?"":attrs[k]);
+  }
+  kids.flat().forEach(c=>{ if(c==null) return; n.append(c.nodeType?c:document.createTextNode(c)); });
+  return n;
+}
+
+/* ---------- panel rendering ---------- */
+const panel = $("#panel");
+
+function aceBar(cur){
+  const order=["A","C","E"]; const ci=order.indexOf(cur);
+  return el("div",{class:"ace"},
+    order.map((l,i)=>el("span",{class:"l"+(i===ci?" on":i<ci?" done":""),title:{A:"Acknowledge",C:"Come back into your body",E:"Engage"}[l],text:l})),
+    el("span",{class:"round",text:"Round "+S.round}));
+}
+
+function scaleField(id, question, value, words, lowEnd, highEnd, onInput){
+  const out=el("output",{for:id,text:words[value]});
+  const input=el("input",{type:"range",id,min:0,max:10,step:1,value,"aria-valuetext":words[value]});
+  input.addEventListener("input",()=>{ const v=+input.value; out.textContent=words[v]; input.setAttribute("aria-valuetext",words[v]); onInput(v); });
+  return el("div",{class:"field"},
+    el("label",{class:"q",for:id,text:question}),
+    el("div",{class:"scale"},input,out),
+    el("div",{class:"ends"},el("span",{text:lowEnd}),el("span",{text:highEnd})));
+}
+
+function render(){
+  clearTimers();
+  panel.innerHTML="";
+  const f={before:renderBefore,A:renderA,C:renderC,E:renderE,after:renderAfter,done:renderDone}[S.phase];
+  f();
+  const h=panel.querySelector("h2"); if(h){ h.setAttribute("tabindex","-1"); }
+}
+function go(phase, countStation){
+  if(countStation) S.stations++;
+  S.phase=phase; render();
+  const h=panel.querySelector("h2"); if(h) h.focus({preventScroll:true});
+  if(window.innerWidth<=760) panel.scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"});
+}
+
+function renderBefore(){
+  panel.append(
+    el("h2",{text:"Before you drop"}),
+    el("p",{class:"lead",text:"Take two quick readings. There are no right answers, and you’ll take them again at the end."}),
+    scaleField("roughB","How rough is the water right now?",S.before.rough,ROUGH_WORDS,"Calm","Storm",v=>{S.before.rough=v;}),
+    scaleField("hereB","How much of you is here, in this room?",S.before.here,HERE_WORDS,"Swept away","Fully here",v=>{S.before.here=v;}),
+    el("div",{class:"actions"},el("button",{class:"btn",onclick:()=>{ S.dropped=true; go("A"); },text:"Let the anchor go"}))
+  );
+}
+
+function feelingList(){
+  const all=[...FEELINGS]; S.extraFeelings.forEach(x=>{ if(!all.includes(x)) all.push(x); });
+  return all;
+}
+function renderA(){
+  const err=el("p",{class:"err",role:"alert"});
+  const chips=el("div",{class:"chips",role:"group","aria-label":"What’s showing up"});
+  let drawChips=function(){
+    chips.innerHTML="";
+    feelingList().forEach(t=>{
+      chips.append(el("button",{class:"chip",type:"button","aria-pressed":S.named.has(t)?"true":"false",text:t,onclick:()=>{
+        S.named.has(t)?S.named.delete(t):S.named.add(t); err.textContent=""; drawChips();
+      }}));
+    });
+  };
+  const toska=el("p",{class:"toska"});
+  const _draw=drawChips;
+  drawChips=function(){ _draw(); toska.textContent=S.named.has("Toska")
+    ? "Toska is a Russian word for a deep, aching longing, sometimes for something you can’t quite name. It’s allowed to be here too. You don’t have to fix it, only notice it."
+    : ""; };
+  drawChips();
+  const inp=el("input",{type:"text",maxlength:60,placeholder:"In your own words",["aria-label"]:"Name something else that’s showing up"});
+  function add(){
+    const v=inp.value.trim(); if(!v) return;
+    if(!S.extraFeelings.includes(v) && !FEELINGS.includes(v)) S.extraFeelings.push(v);
+    S.named.add(v); inp.value=""; err.textContent=""; drawChips(); inp.focus();
+  }
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); }});
+  panel.append(
+    aceBar("A"),
+    el("h2",{text:"Acknowledge what’s here"}),
+    el("p",{class:"lead",text:S.round===1
+      ? "Turn toward what’s happening inside you and name it plainly, without arguing with it: here is dread, here is a tight chest, here is the urge to walk out."
+      : "Check in again. Is the same thing still here? Has something new shown up? Keep what fits, add what’s new."}),
+    chips,
+    toska,
+    el("div",{class:"addrow"},inp,el("button",{class:"btn ghost small",type:"button",onclick:add,text:"Add"})),
+    err,
+    el("div",{class:"actions"},el("button",{class:"btn",onclick:()=>{
+      if(S.named.size===0){ err.textContent="Name at least one thing to continue. This is the step that’s easiest to skip."; return; }
+      S.named.forEach(x=>S.allNamed.add(x)); go("C",true);
+    },text:"I’ve named it"}))
+  );
+}
+
+function moveCounts(){
+  const c={}; LOG.forEach(e=>(e.moves||[]).forEach(m=>{ c[m]=(c[m]||0)+1; })); return c;
+}
+function moveList(){
+  const counts=moveCounts();
+  const all=[...MOVES];
+  Object.keys(counts).forEach(m=>{ if(!all.includes(m)) all.push(m); });
+  S.extraMoves.forEach(m=>{ if(!all.includes(m)) all.push(m); });
+  return all.map((m,i)=>({m,n:counts[m]||0,i})).sort((a,b)=>b.n-a.n||a.i-b.i);
+}
+function renderC(){
+  const err=el("p",{class:"err",role:"alert"});
+  const chips=el("div",{class:"chips",role:"group","aria-label":"Choose one slow move"});
+  function drawChips(){
+    chips.innerHTML="";
+    moveList().forEach(({m,n})=>{
+      const b=el("button",{class:"chip",type:"button","aria-pressed":S.move===m?"true":"false",onclick:()=>{ S.move=m; err.textContent=""; drawChips(); }},m);
+      if(n) b.append(el("span",{class:"n",text:"used "+n+"×"}));
+      chips.append(b);
+    });
+  }
+  drawChips();
+  const inp=el("input",{type:"text",maxlength:60,placeholder:"Your own move",["aria-label"]:"Describe your own slow move"});
+  function add(){ const v=inp.value.trim(); if(!v) return; if(!S.extraMoves.includes(v)) S.extraMoves.push(v); S.move=v; inp.value=""; err.textContent=""; drawChips(); }
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); }});
+
+  // breath pacer
+  const dot=el("div",{class:"dot"}); const say=el("span",{class:"say",text:"Ready when you are"});
+  const startBtn=el("button",{class:"btn ghost small",type:"button",text:"Breathe with it"});
+  startBtn.addEventListener("click",()=>{
+    clearTimers(); startBtn.disabled=true; let cycle=0;
+    const step=()=>{
+      if(cycle>=3){ say.textContent="Keep noticing"; dot.style.transform="scale(.45)"; startBtn.disabled=false; startBtn.textContent="Again"; return; }
+      cycle++;
+      say.textContent="Move slowly, breathe in… ("+cycle+" of 3)"; dot.style.transitionDuration=reduced?"0s":"4s"; dot.style.transform="scale(1)";
+      timers.push(setTimeout(()=>{ say.textContent="…and out ("+cycle+" of 3)"; dot.style.transitionDuration=reduced?"0s":"6s"; dot.style.transform="scale(.45)";
+        timers.push(setTimeout(step,6000)); },4000));
+    };
+    step();
+  });
+
+  panel.append(
+    aceBar("C"),
+    el("h2",{text:"Come back into your body"}),
+    el("p",{class:"lead",text:"Keep noticing what you named while you make one slow, deliberate move. You’re widening your attention to include your body, not trading the feeling for your feet."}),
+    chips,
+    el("div",{class:"addrow"},inp,el("button",{class:"btn ghost small",type:"button",onclick:add,text:"Add"})),
+    el("div",{class:"field",style:"margin-top:1.2rem"},
+      el("div",{class:"pacer"},el("div",{class:"ring"},dot),el("div",{},say,el("div",{style:"margin-top:6px"},startBtn)))),
+    err,
+    el("div",{class:"actions"},el("button",{class:"btn",onclick:()=>{
+      if(!S.move){ err.textContent="Pick or write one move to continue."; return; }
+      S.moves.push(S.move); go("E",true);
+    },text:"I’ve made the move"}))
+  );
+}
+
+function renderE(){
+  const list=el("ul",{class:"checks"});
+  NOTICES.forEach((t,i)=>{
+    const id="n"+i;
+    const cb=el("input",{type:"checkbox",id,checked:S.noticed.has(t)});
+    cb.addEventListener("change",()=>{ cb.checked?S.noticed.add(t):S.noticed.delete(t); });
+    list.append(el("li",{},el("label",{for:id},cb,el("span",{text:t}))));
+  });
+  const ret=el("input",{class:"textin",type:"text",id:"ret",maxlength:120,value:S.returning,placeholder:"e.g. finishing this email, the conversation with my kid"});
+  ret.addEventListener("input",()=>{ S.returning=ret.value; });
+  function nextRound(){ S.round++; S.named=new Set(S.named); S.noticed=new Set(); go("A",true); }
+  panel.append(
+    aceBar("E"),
+    el("h2",{text:"Engage with where you are"}),
+    el("p",{class:"lead",text:"Look around and listen. Take in the room, then turn toward the thing in front of you."}),
+    list,
+    el("div",{class:"field"},el("label",{class:"q",for:"ret",text:"What are you coming back to?"}),ret),
+    el("div",{class:"actions"},
+      el("button",{class:"btn ghost",onclick:nextRound,text:"Go around again"}),
+      el("button",{class:"btn",onclick:()=>{ S.stations++; S.set=true; S.after={...S.before}; puff(); go("after"); },text:"Set the anchor"})),
+    el("p",{class:"hint",style:"margin-top:.8rem",text:S.round<3
+      ? "Three or four slow rounds usually works best. One round is fine when you’re short on time."
+      : "That’s "+S.round+" rounds. Set the anchor whenever you feel your footing."})
+  );
+}
+
+function renderAfter(){
+  panel.append(
+    el("h2",{text:"Anchor’s holding"}),
+    el("p",{class:"lead",text:"Take the same two readings again. The water doesn’t have to calm for this to have worked."}),
+    scaleField("roughA","How rough is the water now?",S.after.rough,ROUGH_WORDS,"Calm","Storm",v=>{S.after.rough=v;}),
+    scaleField("hereA","How much of you is here now?",S.after.here,HERE_WORDS,"Swept away","Fully here",v=>{S.after.here=v;}),
+    el("div",{class:"actions"},el("button",{class:"btn",onclick:logDrop,text:"Log this drop"}))
+  );
+}
+
+function verdict(dh, dr){
+  // dh: presence change, dr: roughness change (negative = calmer)
+  if(dh>0 && dr>=0) return "You came back more present while the water stayed just as rough. That’s the skill doing exactly what it’s for. Fierce and steady.";
+  if(dh>0 && dr<0)  return "You came back more present, and the water eased a little too.";
+  if(dh===0 && dr<0) return "The water eased, though you feel about as present as before. Try a slower round or a different move next time.";
+  if(dh===0) return "Not much shifted this time. That happens, and it still counts as practice. Tigers train on calm days too.";
+  return "You feel less present than when you started. If this keeps happening, try a single slow round, or talk it through with someone you trust.";
+}
+function renderDone(){
+  const e=LOG[0]; const dh=e.after.here-e.before.here, dr=e.after.rough-e.before.rough;
+  const sign=n=>n>0?"+"+n:String(n);
+  panel.append(
+    el("h2",{text:"Steady, tiger."}),
+    el("p",{class:"lead",text:verdict(dh,dr)}),
+    el("div",{class:"result"},
+      el("div",{class:"reading"},el("h3",{text:"Here in the room"}),el("div",{class:"val"},e.before.here+" → "+e.after.here+" ",el("small",{text:"("+sign(dh)+")"}))),
+      el("div",{class:"reading"},el("h3",{text:"Roughness of the water"}),el("div",{class:"val"},e.before.rough+" → "+e.after.rough+" ",el("small",{text:"("+sign(dr)+")"})))),
+    e.returning ? el("p",{},"You’re coming back to: ",el("strong",{text:e.returning})) : null,
+    el("div",{class:"actions"},el("button",{class:"btn ghost",onclick:()=>{ S=freshSession(); render(); $("#panel h2").focus(); },text:"Drop anchor again"}))
+  );
+}
+
+/* ---------- log ---------- */
+async function logDrop(){
+  const entry={ t:Date.now(), rounds:S.round, before:{...S.before}, after:{...S.after},
+    named:[...S.allNamed], moves:[...new Set(S.moves)], returning:S.returning.trim() };
+  LOG.unshift(entry); LOG=LOG.slice(0,500);
+  S.phase="done"; render(); $("#panel h2").focus();
+  renderLog(); await saveLog();
+}
+function renderLog(){
+  const body=$("#logBody"); body.innerHTML="";
+  if(!LOG.length){ body.append(el("p",{class:"empty",text:"Nothing logged yet. Each drop you log shows up here, along with the moves that steadied you."}), backupRow(false)); return; }
+  const n=LOG.length;
+  const avg=f=>LOG.reduce((s,e)=>s+f(e),0)/n;
+  const dh=avg(e=>e.after.here-e.before.here), dr=avg(e=>e.after.rough-e.before.rough);
+  const fmt=x=>(x>0?"+":"")+x.toFixed(1);
+  body.append(el("p",{class:"insight"},
+    n===1 ? "1 drop so far. " : n+" drops so far. ",
+    "On average you came back ",el("strong",{text:fmt(dh)})," in presence, while the water changed by ",el("strong",{text:fmt(dr)}),". ",
+    n>1 ? (dh>Math.abs(dr) ? "Presence is rising more than the water is calming, which is what the skill is meant to do." : "Presence and the water are moving about together so far.") : ""));
+  const top=moveList().filter(x=>x.n>0).slice(0,3);
+  if(top.length) body.append(el("p",{class:"toplist"},"Moves you lean on most: ",top.map((x,i)=>[i?", ":"",el("strong",{text:x.m})," ("+x.n+"×)"]).flat()));
+  const ul=el("ul",{class:"entries"});
+  LOG.slice(0,30).forEach(e=>{
+    const d=new Date(e.t);
+    const when=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+    const bar=(b,a)=>el("span",{class:"bar"},el("i",{class:"b",style:"left:calc("+b*10+"% - 1.5px)"}),el("i",{class:"a",style:"left:calc("+a*10+"% - 1.5px)"}));
+    ul.append(el("li",{class:"entry"},
+      el("div",{},el("time",{datetime:d.toISOString(),text:when}),el("div",{class:"sub",text:e.rounds+(e.rounds===1?" round":" rounds")})),
+      el("div",{},
+        el("div",{text:(e.named||[]).join(", ")||"—"}),
+        el("div",{class:"sub",text:"Moves: "+((e.moves||[]).join(", ")||"—")+(e.returning?" · Back to: "+e.returning:"")})),
+      el("div",{},
+        el("div",{class:"sound","aria-label":"Presence "+e.before.here+" to "+e.after.here},"Here",bar(e.before.here,e.after.here),e.before.here+"→"+e.after.here),
+        el("div",{class:"sound","aria-label":"Water "+e.before.rough+" to "+e.after.rough},"Water",bar(e.before.rough,e.after.rough),e.before.rough+"→"+e.after.rough))
+    ));
+  });
+  body.append(ul);
+  body.append(backupRow(true));
+}
+function backupRow(hasData){
+  const file=el("input",{type:"file",accept:".json,application/json",hidden:true});
+  file.addEventListener("change",async()=>{
+    const f=file.files[0]; if(!f) return;
+    try{
+      const data=JSON.parse(await f.text());
+      const arr=Array.isArray(data)?data:(data&&Array.isArray(data.entries)?data.entries:null);
+      const ok=arr&&arr.filter(e=>e&&typeof e.t==="number"&&e.before&&e.after);
+      if(!ok||!ok.length) throw new Error("empty");
+      const seen=new Map(); [...LOG,...ok].forEach(e=>seen.set(e.t,e));
+      LOG=[...seen.values()].sort((a,b)=>b.t-a.t).slice(0,500);
+      renderLog(); await saveLog();
+      $("#storageNote").textContent="Imported "+ok.length+" drop"+(ok.length===1?"":"s")+" from your backup.";
+    }catch(e){ $("#storageNote").textContent="That file isn’t a Drop anchor backup. Choose the .json file you exported."; }
+    file.value="";
+  });
+  const row=el("div",{class:"backup"},
+    hasData?el("button",{class:"btn ghost small",type:"button",onclick:exportLog,text:"Export backup"}):null,
+    el("button",{class:"btn ghost small",type:"button",onclick:()=>file.click(),text:"Import backup"}),
+    hasData?el("button",{class:"btn ghost small",type:"button",onclick:async()=>{
+      if(!confirm("Clear every logged drop? This can’t be undone unless you’ve exported a backup.")) return;
+      LOG=[]; renderLog(); await saveLog();
+    },text:"Clear log"}):null,
+    file,
+    el("p",{class:"hint",text:"Your log lives on this phone, in this browser. Export a backup now and then, especially before clearing browser data or switching phones."}));
+  return row;
+}
+function exportLog(){
+  const d=new Date(), name="drop-anchor-log-"+d.toISOString().slice(0,10)+".json";
+  const blob=new Blob([JSON.stringify({app:"drop-anchor",version:1,exported:d.toISOString(),entries:LOG},null,1)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=el("a",{href:url,download:name}); document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+/* ---------- storage: private account storage if available, else this browser ---------- */
+const LS_KEY="drop-anchor-log-v1";
+let ref=null;
+function lsGet(){ try{ const v=localStorage.getItem(LS_KEY); return v?JSON.parse(v):[]; }catch(e){ return []; } }
+function lsSet(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(LOG)); }catch(e){} }
+async function saveLog(){
+  lsSet();
+  if(ref){ try{ await ref.set({entries:LOG}); }catch(e){ $("#storageNote").textContent="Couldn’t save to your account just now. This drop is kept in this browser."; } }
+}
+async function initStorage(){
+  const note=$("#storageNote");
+  LOG=lsGet(); renderLog();
+  note.textContent="Saved on this device.";
+  try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+  if(!(window.claude && typeof window.claude.use==="function")) return;
+  try{
+    const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!db||!user) return;
+    const uid=await user.id(); if(!uid) return;
+    const r=db.doc("data/users/"+uid+"/anchor-log");
+    const snap=await Promise.race([r.get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),10000))]);
+    ref=r;
+    const remote=(snap.exists && Array.isArray(snap.data().entries))?snap.data().entries:[];
+    // merge by timestamp so nothing logged before sign-in is lost
+    const seen=new Map(); [...remote,...LOG].forEach(e=>seen.set(e.t,e));
+    LOG=[...seen.values()].sort((a,b)=>b.t-a.t).slice(0,200);
+    if(LOG.length!==remote.length) await saveLog(); else lsSet();
+    note.textContent="Saved privately to your account. Only you can see it.";
+    renderLog();
+  }catch(e){ /* keep browser storage */ }
+}
+
+/* ---------- the sea ---------- */
+const NS="http://www.w3.org/2000/svg";
+const svg=$("#scene");
+function sv(tag,attrs,parent){ const n=document.createElementNS(NS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); (parent||svg).appendChild(n); return n; }
+let W=300,H=600,surf=90,bed=560,scale=1;
+let G={};
+let anchorY=null, tStart=performance.now(), puffT=-1;
+
+function build(){
+  const r=svg.getBoundingClientRect(); W=Math.max(200,r.width); H=Math.max(180,r.height);
+  svg.setAttribute("viewBox","0 0 "+W+" "+H); svg.innerHTML="";
+  const mobile=H<320;
+  surf=Math.round(H*(mobile?0.34:0.17)); bed=H-(mobile?18:30); scale=mobile?0.62:Math.min(1,W/300);
+  const defs=sv("defs",{});
+  const lg=sv("linearGradient",{id:"water",x1:0,y1:0,x2:0,y2:1},defs);
+  sv("stop",{offset:"0",style:"stop-color:var(--sea-top)"},lg);
+  sv("stop",{offset:"1",style:"stop-color:var(--sea-deep)"},lg);
+  const sg=sv("linearGradient",{id:"skyG",x1:0,y1:0,x2:0,y2:1},defs);
+  sv("stop",{offset:"0",style:"stop-color:var(--sky-top)"},sg);
+  sv("stop",{offset:"1",style:"stop-color:var(--sky)"},sg);
+  sv("rect",{x:0,y:0,width:W,height:surf+40,fill:"url(#skyG)"});
+  G.water=sv("path",{fill:"url(#water)"});
+  // depth soundings down the left edge
+  const marks=mobile?3:6;
+  for(let i=1;i<=marks;i++){
+    const y=surf+(bed-surf)*i/(marks+1);
+    sv("line",{x1:0,x2:10,y1:y,y2:y,stroke:"var(--on-water)","stroke-width":1});
+    const t=sv("text",{x:14,y:y+4,"font-size":11,"font-family":"Alegreya Sans, sans-serif",fill:"var(--on-water)"}); t.textContent=i+(i===1?" fathom":"");
+  }
+  // seabed
+  let d="M0 "+H+" L0 "+bed;
+  for(let x=0;x<=W;x+=20){ d+=" Q"+(x+10)+" "+(bed+(x/20%2?4:-4))+" "+(x+20)+" "+bed; }
+  d+=" L"+W+" "+H+" Z";
+  sv("path",{d,style:"fill:var(--sand)"});
+  G.puff=sv("g",{opacity:0});
+  for(let i=0;i<5;i++) sv("circle",{cx:0,cy:0,r:3+i%2*2,style:"fill:var(--sand-dark)"},G.puff);
+  G.chain=sv("path",{fill:"none",style:"stroke:var(--rope)","stroke-width":2.4,"stroke-dasharray":"5 3","stroke-linecap":"round"});
+  G.anchor=sv("g",{});
+  const a=G.anchor, st="stroke:var(--brass)";
+  sv("circle",{cx:0,cy:-30,r:5,fill:"none",style:st,"stroke-width":3},a);
+  sv("line",{x1:0,y1:-25,x2:0,y2:20,style:st,"stroke-width":3.4,"stroke-linecap":"round"},a);
+  sv("line",{x1:-12,y1:-17,x2:12,y2:-17,style:st,"stroke-width":3,"stroke-linecap":"round"},a);
+  sv("path",{d:"M-19 4 Q-17 22 0 21 Q17 22 19 4",fill:"none",style:st,"stroke-width":3.2,"stroke-linecap":"round"},a);
+  sv("path",{d:"M-23 9 L-19 2 L-14 8",fill:"none",style:st,"stroke-width":2.6,"stroke-linejoin":"round"},a);
+  sv("path",{d:"M23 9 L19 2 L14 8",fill:"none",style:st,"stroke-width":2.6,"stroke-linejoin":"round"},a);
+  G.boat=sv("g",{});
+  sv("path",{d:"M-36 -3 L36 -3 L27 12 L-28 12 Z",style:"fill:var(--ink)"},G.boat);
+  sv("line",{x1:-2,y1:-3,x2:-2,y2:-46,style:"stroke:var(--ink)","stroke-width":2.2},G.boat);
+  sv("path",{d:"M1 -44 L1 -8 L26 -8 Z",style:"fill:var(--surface);stroke:var(--ink)","stroke-width":1.2},G.boat);
+  // a small tiger riding along at the stern
+  const tg=sv("g",{},G.boat), tf="fill:var(--tiger)", sk="stroke:var(--stripe)";
+  sv("path",{d:"M-28 -7 Q-40 -8 -38 -19",fill:"none",style:"stroke:var(--tiger)","stroke-width":2.6,"stroke-linecap":"round"},tg);
+  sv("path",{d:"M-37.6 -15 L-38 -19",fill:"none",style:sk,"stroke-width":2.6,"stroke-linecap":"round"},tg);
+  sv("ellipse",{cx:-20,cy:-9,rx:8,ry:6.5,style:tf},tg);
+  sv("path",{d:"M-25 -24 L-24 -30 L-20.5 -25.5 Z",style:tf},tg);
+  sv("path",{d:"M-17.5 -25.5 L-14.5 -30 L-14 -24 Z",style:tf},tg);
+  sv("circle",{cx:-19.5,cy:-19.5,r:6.2,style:tf},tg);
+  [["M-22 -13 L-21 -7"],["M-18.5 -14 L-18 -7.5"],["M-15 -12.5 L-15 -8"],["M-19.5 -25.6 L-19.5 -23"],["M-25.4 -19 L-23.4 -18.5"],["M-13.6 -19 L-15.6 -18.5"]]
+    .forEach(([d])=>sv("path",{d,fill:"none",style:sk,"stroke-width":1.3,"stroke-linecap":"round"},tg));
+  sv("circle",{cx:-21.6,cy:-20,r:0.95,style:"fill:var(--stripe)"},tg);
+  sv("circle",{cx:-17.4,cy:-20,r:0.95,style:"fill:var(--stripe)"},tg);
+  sv("path",{d:"M-20.4 -17.3 L-18.6 -17.3 L-19.5 -16.3 Z",style:"fill:var(--stripe)"},tg);
+  G.front=sv("path",{fill:"url(#water)",opacity:.35}); // thin wave in front of hull
+}
+function currentRough(){ return S.phase==="after"||S.phase==="done" ? S.after.rough : S.before.rough; }
+function waveY(x,t,amp,spd){
+  return surf+amp*(0.7*Math.sin(x*0.035+t*spd)+0.3*Math.sin(x*0.083-t*spd*1.45));
+}
+let ampNow=4;
+function frame(now){
+  const t=reduced?0:(now-tStart)/1000;
+  const rough=currentRough();
+  const ampTarget=(1.2+rough*1.55)*(H<320?0.7:1);
+  ampNow+=(ampTarget-ampNow)*0.04;
+  const spd=0.7+rough*0.13;
+  // water surface
+  let d="M0 "+H+" L0 "+waveY(0,t,ampNow,spd).toFixed(1);
+  for(let x=8;x<=W+8;x+=8) d+=" L"+x+" "+waveY(x,t,ampNow,spd).toFixed(1);
+  d+=" L"+W+" "+H+" Z";
+  G.water.setAttribute("d",d);
+  // boat
+  const bx=W*0.42, by=waveY(bx,t,ampNow,spd);
+  const slope=(waveY(bx+10,t,ampNow,spd)-waveY(bx-10,t,ampNow,spd))/20;
+  const ang=Math.atan(slope)*180/Math.PI;
+  G.boat.setAttribute("transform","translate("+bx.toFixed(1)+" "+(by-4).toFixed(1)+") rotate("+ang.toFixed(1)+") scale("+scale+")");
+  let fd="M"+(bx-40*scale).toFixed(1)+" "+(waveY(bx-40*scale,t,ampNow,spd)+4*scale).toFixed(1);
+  for(let x=bx-40*scale;x<=bx+40*scale;x+=4) fd+=" L"+x.toFixed(1)+" "+(waveY(x,t,ampNow,spd)+4*scale).toFixed(1);
+  for(let x=bx+40*scale;x>=bx-40*scale;x-=4) fd+=" L"+x.toFixed(1)+" "+(waveY(x,t,ampNow,spd)+16*scale).toFixed(1);
+  fd+=" Z"; G.front.setAttribute("d",fd);
+  // anchor
+  const bowX=bx+30*scale, bowY=by+4*scale;
+  const restY=bed-21*scale;
+  let target;
+  if(!S.dropped) target=bowY+30*scale;
+  else if(S.set) target=restY;
+  else target=bowY+30*scale+(restY-bowY-30*scale)*Math.min(S.stations/9,1)*0.9;
+  if(anchorY==null) anchorY=target;
+  anchorY+=(target-anchorY)*(reduced?1:0.035);
+  const ax=bowX+ (S.dropped? 26*scale*Math.min(1,(anchorY-bowY)/(restY-bowY)) : 0);
+  const sway=S.dropped&&!S.set&&!reduced? Math.sin(t*0.9)*2:0;
+  G.anchor.setAttribute("transform","translate("+(ax+sway).toFixed(1)+" "+anchorY.toFixed(1)+") scale("+scale+")");
+  const ringY=anchorY-35*scale;
+  const slack=Math.max(0,(ringY-bowY))*0.12;
+  G.chain.setAttribute("d","M"+bowX.toFixed(1)+" "+bowY.toFixed(1)+" Q"+(bowX-slack).toFixed(1)+" "+((bowY+ringY)/2).toFixed(1)+" "+(ax+sway).toFixed(1)+" "+ringY.toFixed(1));
+  // sand puff when the anchor beds in
+  if(puffT>=0){
+    const p=(now-puffT)/1400;
+    if(p>=1||reduced){ G.puff.setAttribute("opacity",0); puffT=-1; }
+    else{
+      G.puff.setAttribute("opacity",(1-p)*0.8);
+      [...G.puff.children].forEach((c,i)=>{ const dir=(i-2)*12*scale; c.setAttribute("cx",(ax+dir*(0.4+p)).toFixed(1)); c.setAttribute("cy",(bed-4-p*12*(1+i%2)).toFixed(1)); });
+    }
+  }
+  if(!reduced || Math.abs(ampTarget-ampNow)>0.05) requestAnimationFrame(frame);
+  else idle=true;
+}
+let idle=false;
+function kick(){ if(idle){ idle=false; requestAnimationFrame(frame); } }
+function puff(){ setTimeout(()=>{ puffT=performance.now(); kick(); }, reduced?0:1200); }
+
+new ResizeObserver(()=>{ build(); kick(); }).observe($(".sea"));
+document.addEventListener("input",kick); document.addEventListener("click",kick);
+
+build(); render(); renderLog(); requestAnimationFrame(frame);
+initStorage();
+if("serviceWorker" in navigator && location.protocol==="https:"){
+  window.addEventListener("load",()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
+})();
+</script>
+</body>
+</html>

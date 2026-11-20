@@ -1,0 +1,14 @@
+{
+  "name": "Drop anchor",
+  "short_name": "Drop anchor",
+  "description": "A short ACE grounding exercise with a private log.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F1EEF3",
+  "theme_color": "#2C3566",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
